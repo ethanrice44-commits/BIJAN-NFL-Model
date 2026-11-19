@@ -213,8 +213,8 @@ def main():
         if not games:
             print('No upcoming games; empty snapshot, no retroactive capture.');return
         # Don't fetch full season assets on every 15-minute poll when no game is near.
-        nearest=min((pd.to_datetime(g['kickoff'],utc=True).to_pydatetime()-now for g in games))
-        if os.environ.get("GITHUB_EVENT_NAME") != "workflow_dispatch" and nearest>dt.timedelta(hours=3) and (now.hour!=13 or now.minute>15)
+        nearest=min((pd.to_datetime(g['kickoff'],utc=True).to_pydatetime()-now for g in games)
+if os.environ.get("GITHUB_EVENT_NAME") != "workflow_dispatch" and nearest > dt.timedelta(hours=3) and (now.hour != 13 or now.minute > 15):
             print('No games in next 3 hours; daily pregame refresh window not reached.');return
         roster_url=f'{NFLVERSE}/rosters/roster_{args.season}.parquet'
         depth_url=f'{NFLVERSE}/depth_charts/depth_charts_{args.season}.parquet'
