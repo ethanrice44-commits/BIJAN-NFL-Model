@@ -1,0 +1,34 @@
+
+name: BIJAN pregame roster evidence capture
+on:
+  workflow_dispatch:
+  schedule:
+    # One daily candidate refresh; closer polling on typical NFL game days.
+    - cron: '7 13 * * *'
+    - cron: '7,22,37,52 15-23 * * 0,1,4'
+    - cron: '7,22,37,52 0-5 * * 1,2,5'
+permissions:
+  contents: read
+jobs:
+  roster-collector:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Capture pre-kickoff sources and produce fail-closed BIJAN gates
+        env:
+          BIJAN_SPORTRADAR_KEY: ${{ secrets.BIJAN_SPORTRADAR_KEY }}
+          BIJAN_SPORTRADAR_LEVEL: ${{ vars.BIJAN_SPORTRADAR_LEVEL || 'trial' }}
+        run: python roster_runner.py --mode live --season 2026 --output output
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bijan-rosters-${{ github.run_id }}
+          path: output/
+          retention-days: 90
+          if-no-files-found: warn
